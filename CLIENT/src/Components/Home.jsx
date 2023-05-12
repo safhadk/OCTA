@@ -1,8 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import InputField from './InputField';
 import Radio from './Radio';
+import axios from '../Axios/axios';
+
 
 function Home() {
 
@@ -14,22 +16,92 @@ function Home() {
   const [model, setModel] = useState("")
   const [startDate, setStartDate] = useState(new Date());
   const [endDate, setEndDate] = useState(new Date());
+  const [vehicleTypes, setVehicleTypes] = useState([])
+  const [vehicleModel, setvehicleModel] = useState([])
+  const [success, setSuccess] = useState(false)
+  const [error, setError] = useState(false)
 
   const onNextClick = () => {
-    setNext(next + 1)
+    const isFirstNameValid = firstName.trim().length > 0;
+    const isLastNameValid = lastName.trim().length > 0;
+    if (!isFirstNameValid) {
+      setError("Please enter a valid first name");
+    } else if (!isLastNameValid) {
+      setError("Please enter a valid last name");
+    } else if ((next === 2 && !numWheels) || (next === 3 && !type) || (next === 4 && !model)) {
+      setError("Please Select One Option");
+    } else {
+      setError(false);
+      setNext(next + 1);
+    }
   }
 
   const onPrevClick = () => {
-      setNext(next - 1)
+    setNext(next - 1)
   }
 
   const submit = () => {
-    console.log("submitted")
+    console.log(startDate.getTime(),"---------------",endDate.getTime())
+    if(startDate.getTime()>endDate.getTime()){
+      setError("Start Date Must Be Less Than End Date");
+    }else{
+      setError(false)
+      setNext(0)
+      setSuccess(!success)
+      console.log("submitted")
+    }
+    
   }
+
+
+  // const seedBikes = async () => {
+  //   const { data } = await axios.post("/")
+  // }
+
+  // useEffect(() => {
+  //   seedBikes()
+  // }, [])
+
+  const handleWheels = async (value) => {
+    setNumWheels(value)
+    setType("")
+    const { data } = await axios.get(`/?wheel=${value}`)
+    setVehicleTypes(data)
+  };
+
+  const handleType = async (value) => {
+    setType(value)
+    setModel("")
+    const { data } = await axios.get(`/?wheel=${numWheels}&type=${value}`)
+    setvehicleModel(data)
+  };
 
   return (
 
     <div className="mx-auto flex flex-col space-y-4 sm:w-1/2 md:w-1/3 lg:w-1/4 border-2 border-gray-300 bg-gray-100 p-6 rounded-lg">
+      {error && <div class="flex items-center bg-red-500 text-white text-sm font-bold px-4 py-3" role="alert">
+        <svg class="fill-current w-4 h-4 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M12.432 0c1.34 0 2.01.912 2.01 1.957 0 1.305-1.164 2.512-2.679 2.512-1.269 0-2.009-.75-1.974-1.99C9.789 1.436 10.67 0 12.432 0zM8.309 20c-1.058 0-1.833-.652-1.093-3.524l1.214-5.092c.211-.814.246-1.141 0-1.141-.317 0-1.689.562-2.502 1.117l-.528-.88c2.572-2.186 5.531-3.467 6.801-3.467 1.057 0 1.233 1.273.705 3.23l-1.391 5.352c-.246.945-.141 1.271.106 1.271.317 0 1.357-.392 2.379-1.207l.6.814C12.098 19.02 9.365 20 8.309 20z" /></svg>
+        <p>{error}</p>
+      </div>}
+
+      {success &&<div class="bg-gray-100 ">
+      <div class="bg-white p-6  md:mx-auto">
+        <svg viewBox="0 0 24 24" class="text-green-600 w-16 h-16 mx-auto my-6">
+            <path fill="currentColor"
+                d="M12,0A12,12,0,1,0,24,12,12.014,12.014,0,0,0,12,0Zm6.927,8.2-6.845,9.289a1.011,1.011,0,0,1-1.43.188L5.764,13.769a1,1,0,1,1,1.25-1.562l4.076,3.261,6.227-8.451A1,1,0,1,1,18.927,8.2Z">
+            </path>
+        </svg>
+       
+
+<div class="text-center">
+  <h3 class="md:text-2xl text-base text-gray-900 font-semibold text-center">Booking Confirmed!</h3>
+  <p class="text-gray-600 my-2">Thank you for reserving your car online.</p>
+  <p> Have a safe and enjoyable trip! </p>
+</div>
+    </div>
+  </div>
+
+}
       {next === 1 &&
         <>
           <InputField label={"First Name"} value={firstName} onChange={setFirstName} placeHolder={"Enter Your First Name"} />
@@ -43,8 +115,8 @@ function Home() {
             Number Of Wheels
           </label>
           <div className="flex items-center mt-2">
-            <Radio label={'2'} value={numWheels} onChange={setNumWheels} />
-            <Radio label={'4'} value={numWheels} onChange={setNumWheels} />
+            <Radio label={'2'} value={numWheels} onChange={handleWheels} />
+            <Radio label={'4'} value={numWheels} onChange={handleWheels} />
           </div>
         </>
       }
@@ -55,9 +127,9 @@ function Home() {
             Type of vehicle
           </label>
           <div className="flex items-center mt-2">
-            <Radio label={'hatchback'} value={type} onChange={setType} />
-            <Radio label={'suv'} value={type} onChange={setType} />
-            <Radio label={'sedan'} value={type} onChange={setType} />
+            {vehicleTypes.map((types) => (
+              <Radio key={types} label={types} value={types === type ? type : null} name={"vehicleType"} onChange={handleType} />
+            ))}
           </div>
         </>
       }
@@ -68,9 +140,9 @@ function Home() {
             Specific Model
           </label>
           <div className="flex items-center mt-2">
-            <Radio label={'Audi'} value={model} onChange={setModel} />
-            <Radio label={'Baleno'} value={model} onChange={setModel} />
-            <Radio label={'BMW'} value={model} onChange={setModel} />
+            {vehicleModel.map((models) => (
+              <Radio key={models} label={models} value={models === model ? model : null} name={"vehicle model"} onChange={setModel} />
+            ))}
           </div>
         </>
       }
@@ -81,8 +153,6 @@ function Home() {
             Select a Date Range
           </label>
           <div className="flex items-center mt-2">
-            
-            
             <DatePicker
               selected={startDate}
               startDate={startDate}
@@ -109,9 +179,7 @@ function Home() {
         </>
       }
 
-
-
-      {next !== 1 &&
+      {next !== 1 && next !==0 &&
         <button
           className="w-full px-4 py-2 text-lg font-medium text-white bg-purple-600 rounded-md hover:bg-purple-700 focus:outline-none focus:bg-purple-700"
           onClick={onPrevClick}
@@ -119,9 +187,8 @@ function Home() {
           Previous
         </button>
       }
-      {next !== 5 &&
-        <button
-          className="w-full px-4 py-2 text-lg font-medium text-white bg-purple-600 rounded-md hover:bg-purple-700 focus:outline-none focus:bg-purple-700"
+      {next !== 5 && next !==0&&
+        <button className="w-full px-4 py-2 text-lg font-medium text-white bg-purple-600 rounded-md hover:bg-purple-700 focus:outline-none focus:bg-purple-700"
           onClick={onNextClick}
         >
           Next
@@ -129,13 +196,22 @@ function Home() {
       }
 
       {next === 5 &&
-        <button
-          className="w-full px-4 py-2 text-lg font-medium text-white bg-purple-600 rounded-md hover:bg-purple-700 focus:outline-none focus:bg-purple-700"
+        <button className="w-full px-4 py-2 text-lg font-medium text-white bg-purple-600 rounded-md hover:bg-purple-700 focus:outline-none focus:bg-purple-700"
           onClick={submit}
         >
           Submit
         </button>}
+       
+
+       
+
     </div>
+    
+
+
+
+
+    
   )
 }
 

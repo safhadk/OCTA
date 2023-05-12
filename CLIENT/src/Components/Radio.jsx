@@ -1,28 +1,26 @@
 import React from 'react'
 
 function Radio(props) {
-    const {label,value,onChange}=props
+  const { label, value, onChange, name } = props
   return (
     <>
-<div className='flex justify-center items-center'>
-  <label >
-    {label}
-  </label>
-  <div className="flex items-center m-1">
-    <input
-      type="radio"
-      name={label}
-      id={label}
-      value={label}
-      checked={value === label}
-      onChange={(e) => onChange(e.target.value)}
-    />
-    </div>
-    </div>
-
-
-
-          </>
+      <div className='flex justify-center items-center'>
+        <div className="flex items-center m-1">
+          <input
+            type="radio"
+            name={name}
+            id={label}
+            value={label}
+            checked={value === label}
+            onChange={(e) => onChange(e.target.value)}
+            class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+          />
+        </div>
+        <label >
+          {label}
+        </label>
+      </div>
+    </>
   )
 }
 

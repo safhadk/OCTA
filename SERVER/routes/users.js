@@ -1,6 +1,9 @@
 import express from "express";
-import {} from "../controller/user.js";
+import { vehicles ,VehicleDetails} from "../controller/user.js";
 
 const router = express.Router();
+
+// router.post('/',vehicles)
+router.get('/',VehicleDetails)
 
 export default router;
