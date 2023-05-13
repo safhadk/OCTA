@@ -1,7 +1,7 @@
 import React from 'react'
 
 function Radio(props) {
-  const { label, value, onChange, name } = props
+  const { label, value, onChange, name,img } = props
   return (
     <>
       <div className='flex justify-center items-center'>
@@ -19,6 +19,7 @@ function Radio(props) {
         <label >
           {label}
         </label>
+        <img src={img} alt={img} width={'50px'} height={'50px'} style={{borderRadius:'50px'}}/>
       </div>
     </>
   )

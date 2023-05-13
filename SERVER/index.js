@@ -8,7 +8,6 @@ dotenv.config();
 const app = express();
 
 const corsOptions = {
-  // origin: 'https://main.d3tsvzyxdn3mmt.amplifyapp.com',
   origin: 'http://localhost:2000',
   credentials: true,
   optionSuccessStatus: 200,
@@ -20,11 +19,9 @@ app.use(express.urlencoded({ limit: "30mb", extended: true }));
 app.use(cors(corsOptions));
 app.use(express.static("public"));
 
-
 import userRouter from "./routes/users.js";
 
 app.use("/", userRouter);
-
 
 /* MONGOOSE SETUP */
 const PORT = process.env.PORT;

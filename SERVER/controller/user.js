@@ -1,5 +1,5 @@
-
 import Bikes from "../models/Bikes.js";
+import Bookings from "../models/Bookings.js";
 import Cars from "../models/Cars.js";
 
 export const vehicles = async (req, res) => {
@@ -15,17 +15,16 @@ export const vehicles = async (req, res) => {
             { type: 'sedan', model: 'Mazda 6' }
           ];
           
-        const bike = await Bikes.insertMany(bikes)
-        console.log(`${bike.length} bikes added successfully!`);
-        const car =await Cars.insertMany(cars)
-        console.log(`${car.length} cars added successfully!`);
+          const [bike, car] = await Promise.all([
+            Bikes.insertMany(bikes),
+            Cars.insertMany(cars),
+          ]);
+          console.log(`${bike.length} bikes added successfully!`);
+          console.log(`${car.length} cars added successfully!`);
     } catch (err) {
         console.error(`Error in vehicles: ${err.message}`);
     }
 }
-
-    
-    
 
 export const VehicleDetails=async (req,res)=>{
     try {
@@ -38,7 +37,6 @@ export const VehicleDetails=async (req,res)=>{
             return;
           }
           
-
         else if(wheel==4 && type){
             const models = await Cars.find({ type: req.query.type });
             const modelNames = models.map((model) => model.model);
@@ -46,7 +44,6 @@ export const VehicleDetails=async (req,res)=>{
             res.status(200).json(modelNames);
             return;
         }
-
 
         if(wheel==2){
             const distinctTypes = await Bikes.distinct("type");
@@ -58,15 +55,31 @@ export const VehicleDetails=async (req,res)=>{
             console.log(distinctTypes);
             res.status(200).json(distinctTypes);
             return;
-        }
-
-        
-             
+        }     
     } catch (err) {
         console.error(`Error in vehicle Details: ${err.message}`);
     }
 }
 
+export const submit=async(req,res)=>{
+    try {
+        const {firstName,lastName,wheels,type,model,startDate,endDate}=req.body
+        const booked = await Bookings.find({
+            model: model,
+            startDate: { $lt: new Date(endDate) },
+            endDate: { $gt: new Date(startDate) }
+          });
+         
+          if(booked.length>0){
+            res.json(false)
+          }else{
+            await Bookings.create({firstName,lastName,wheels,type,model,startDate,endDate})
+            res.status(200).json(true)
+          }
+    } catch (err) {
+        console.error(`Error in booking submit: ${err.message}`);
+    }
+}
 
 
 
